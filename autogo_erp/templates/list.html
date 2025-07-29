@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Inventario de Vehículos</h1>
+<a href="{{ url_for('main.create_car') }}" class="btn btn-primary mb-3">Añadir nuevo vehículo</a>
+{% if cars %}
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Año</th>
+            <th>VIN</th>
+            <th>Color</th>
+            <th>Precio (USD)</th>
+            <th>Estado</th>
+            <th>Fecha de ingreso</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for car in cars %}
+            <tr>
+                <td>{{ car.id }}</td>
+                <td>{{ car.brand }}</td>
+                <td>{{ car.model }}</td>
+                <td>{{ car.year }}</td>
+                <td>{{ car.vin }}</td>
+                <td>{{ car.color }}</td>
+                <td>{{ "{:.2f}".format(car.price) }}</td>
+                <td>{{ car.status }}</td>
+                <td>{{ car.entry_date.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <a href="{{ url_for('main.edit_car', car_id=car.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    <form action="{{ url_for('main.delete_car', car_id=car.id) }}" method="post" style="display:inline-block">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que desea eliminar este vehículo?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <p>No hay vehículos en el inventario.</p>
+{% endif %}
+{% endblock %}
