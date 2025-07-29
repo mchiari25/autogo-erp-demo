@@ -28,3 +28,4 @@ def get_clientes():
         {"id": 2, "nombre": "Cliente B", "email": "clienteB@autogo.com"}
     ]
 
+
