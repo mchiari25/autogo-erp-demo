@@ -1,1 +1,1 @@
-web: uvicorn autogo_erp.main:app --host=0.0.0.0 --port=${PORT:-8000}
+uvicorn autogo_erp.main:app --host 0.0.0.0 --port $PORT
