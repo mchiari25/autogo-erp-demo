@@ -3,73 +3,34 @@
 {% block title %}Listado de Autos{% endblock %}
 
 {% block content %}
-{% set m = request.query_params.get('msg') %}
-{% if m %}
-  <div style="background:#e6ffed;border:1px solid #b7f5c5;color:#1a7f37;padding:8px 12px;margin-bottom:12px;border-radius:6px;">
-    {% if m == 'creado' %}Auto creado correctamente.{% elif m == 'actualizado' %}Auto actualizado correctamente.{% elif m == 'eliminado' %}Auto eliminado.{% else %}{{ m }}{% endif %}
-  </div>
-{% endif %}
-
-<div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
-  <a href="/autos-nuevo" style="padding:8px 12px;border:1px solid #ccc;background:#fff;text-decoration:none;border-radius:6px;">+ Agregar Auto</a>
-
-  <form method="get" action="/autos-ui" style="display:flex;gap:8px;align-items:center;margin:0;">
-    <input type="text" name="q" placeholder="Buscar por marca o VIN"
-           value="{{ request.query_params.get('q','') }}"
-           style="padding:8px;width:260px;">
-    <button type="submit" style="padding:8px 12px;border-radius:6px;">Buscar</button>
-    {% if request.query_params.get('q') %}
-      <a href="/autos-ui" style="margin-left:4px;">Limpiar</a>
-    {% endif %}
-    <input type="hidden" name="p" value="{{ p }}">
-  </form>
-</div>
-
 <h1>Autos en Inventario</h1>
+
 <table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>VIN</th>
-            <th>Color</th>
-            <th>Año</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for auto in autos %}
-        <tr>
-            <td>{{ auto.id }}</td>
-            <td>{{ auto.marca }}</td>
-            <td>{{ auto.modelo }}</td>
-            <td>{{ auto.vin }}</td>
-            <td>{{ auto.color }}</td>
-            <td>{{ auto.anio }}</td>
-            <td>${{ "%.2f"|format(auto.precio) }}</td>
-            <td>
-              <a href="/autos-editar/{{ auto.id }}" style="margin-right:8px;">Editar</a>
-              <form method="post" action="/autos-eliminar/{{ auto.id }}" style="display:inline;">
-                <button type="submit">Eliminar</button>
-              </form>
-            </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="8">No hay autos registrados.</td></tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <tr>
+      <th>ID</th><th>Marca</th><th>Modelo</th><th>VIN</th><th>Color</th><th>Año</th><th>Precio</th><th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for auto in autos %}
+    <tr>
+      <td>{{ auto.id }}</td>
+      <td>{{ auto.marca }}</td>
+      <td>{{ auto.modelo }}</td>
+      <td>{{ auto.vin }}</td>
+      <td>{{ auto.color }}</td>
+      <td>{{ auto.anio }}</td>
+      <td>${{ "%.2f"|format(auto.precio) }}</td>
+      <td>
+        <a href="/autos-editar/{{ auto.id }}">Editar</a>
+        <form method="post" action="/autos-eliminar/{{ auto.id }}" style="display:inline;">
+          <button type="submit">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8">No hay autos registrados.</td></tr>
+    {% endfor %}
+  </tbody>
 </table>
-
-<div style="margin-top:12px;display:flex;gap:12px;align-items:center;">
-  {% if p > 1 %}
-    <a href="/autos-ui?p={{ p-1 }}{% if request.query_params.get('q') %}&q={{ request.query_params.get('q') }}{% endif %}">« Anterior</a>
-  {% endif %}
-  <span>Página {{ p }}</span>
-  {% if has_more %}
-    <a href="/autos-ui?p={{ p+1 }}{% if request.query_params.get('q') %}&q={{ request.query_params.get('q') }}{% endif %}">Siguiente »</a>
-  {% endif %}
-</div>
 {% endblock %}
-
