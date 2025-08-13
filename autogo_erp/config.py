@@ -45,3 +45,8 @@ class Config:
     # Enable Flask debug mode when running locally.  This should be
     # disabled in production.
     DEBUG = os.environ.get("AUTOERP_DEBUG", "1") == "1"
+    # Paths for AutoGo branding
+    LOGO_PATH = "static/images/logo_autogo.png"
+    LOGO_SMALL_PATH = "static/images/logo_autogo_small.png"
+    FAVICON_PATH = "static/images/favicon_autogo.png"
+

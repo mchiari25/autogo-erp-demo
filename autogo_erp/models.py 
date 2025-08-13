@@ -1,0 +1,36 @@
+"""Database models for AutoGo ERP.
+
+This module defines the ``Car`` model representing the inventory of automobiles in the system.
+Each car record includes fields for brand, model, year, VIN (Vehicle Identification Number), color,
+price, status, and the date the vehicle was added to inventory.
+
+The SQLAlchemy ORM maps this model to the ``cars`` table in the database.
+We use simple data types appropriate for a lightweight application.
+"""
+
+from datetime import date
+from typing import Optional
+from sqlalchemy import Column, Integer, String, Float, Date
+from sqlalchemy.orm import declarative_base
+from .database import engine
+
+# Base class for all models
+Base = declarative_base()
+
+class Car(Base):
+    """Represents a car in the AutoGo inventory."""
+    __tablename__ = "cars"
+
+    id = Column(Integer, primary_key=True, index=True)
+    brand = Column(String, nullable=False)
+    model = Column(String, nullable=False)
+    year = Column(Integer, nullable=False)
+    vin = Column(String, unique=True, nullable=False)
+    color = Column(String, nullable=True)
+    price = Column(Float, nullable=False)
+    status = Column(String, nullable=False)  # Ej: "Disponible", "Vendido"
+    entry_date = Column(Date, default=date.today)
+
+# Create tables in the database
+Base.metadata.create_all(bind=engine)
+

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+test.db
+uploads/
+outbox/
+.DS_Store

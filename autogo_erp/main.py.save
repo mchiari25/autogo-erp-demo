@@ -1,0 +1,127 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from datetime import date
+from autogo_erp.models import SessionLocal, Car
+
+app = FastAPI()
+
+# Endpoint raíz
+@app.get("/")
+def read_root():
+    return {"message": "Bienvenido a AutoGo ERP Demo"}
+
+# Endpoint para listar autos
+@app.get("/autos")
+def listar_autos():
+    session = SessionLocal()
+    autos = session.query(Car).all()
+    session.close()
+    return [
+        {
+            "id": auto.id,
+            "marca": auto.marca,
+            "modelo": auto.modelo,
+            "anio": auto.anio,
+            "vin": auto.vin,
+            "color": auto.color,
+            "precio": auto.precio,
+            "estado": auto.estado,
+            "fecha_ingreso": auto.fecha_ingreso,
+        }
+        for auto in autos
+    ]
+
+# Modelo de datos para agregar autos
+class CarCreate(BaseModel):
+    marca: str
+    modelo: str
+    anio: int
+    vin: str
+    color: str
+    precio: float
+    estado: str
+    fecha_ingreso: date
+
+# Endpoint para agregar autos
+
+@app.post("/autos")
+def agregar_auto(car: CarCreate):
+    session = SessionLocal()
+    nuevo_auto = Car(
+        marca=car.marca,
+        modelo=car.modelo,
+        anio=car.anio,
+        vin=car.vin,
+        color=car.color,
+        precio=car.precio,
+        estado=car.estado,
+        fecha_ingreso=str(car.fecha_ingreso),
+    )
+    session.add(nuevo_auto)
+    session.commit()
+    session.refresh(nuevo_auto)
+    session.close()
+    return {
+        "id": nuevo_auto.id,
+        "marca": nuevo_auto.marca,
+        "modelo": nuevo_auto.modelo,
+        "anio": nuevo_auto.anio,
+        "vin": nuevo_auto.vin,
+        "color": nuevo_auto.color,
+        "precio": nuevo_auto.precio,
+        "estado": nuevo_auto.estado,
+        "fecha_ingreso": nuevo_auto.fecha_ingreso,
+    }
+
+# Endpoint para actualizar autos
+@app.put("/autos/{auto_id}")
+def actualizar_auto(auto_id: int, car: CarCreate):
+    session = SessionLocal()
+    auto_existente = session.query(Car).filter(Car.id == auto_id).first()
+
+    if not auto_existente:
+        session.close()
+        return {"error": "Auto no encontrado"}
+
+    # Actualizar campos
+    auto_existente.marca = car.marca
+    auto_existente.modelo = car.modelo
+    auto_existente.anio = car.anio
+    auto_existente.vin = car.vin
+    auto_existente.color = car.color
+    auto_existente.precio = car.precio
+    auto_existente.estado = car.estado
+    auto_existente.fecha_ingreso = str(car.fecha_ingreso)
+
+    session.commit()
+    session.refresh(auto_existente)
+    session.close()
+
+    return {
+        "id": auto_existente.id,
+        "marca": auto_existente.marca,
+        "modelo": auto_existente.modelo,
+        "anio": auto_existente.anio,
+        "vin": auto_existente.vin,
+        "color": auto_existente.color,
+        "precio": auto_existente.precio,
+        "estado": auto_existente.estado,
+        "fecha_ingreso": auto_existente.fecha_ingreso,
+    }
+
+# Endpoint para eliminar autos
+@app.delete("/autos/{auto_id}")
+def eliminar_auto(auto_id: int):
+    session = SessionLocal()
+    auto_existente = session.query(Car).filter(Car.id == auto_id).first()
+
+    if not auto_existente:
+        session.close()
+        return {"error": "Auto no encontrado"}
+
+    session.delete(auto_existente)
+    session.commit()
+    session.close()
+
+    return {"mensaje": f"Auto con ID {auto_id} eliminado exitosamente"}
+

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Auto{% endblock %}
+
+{% block content %}
+<h1>Editar Auto #{{ auto.id }}</h1>
+
+{% if error %}
+  <div style="background:#ffecec;border:1px solid #f5b5b5;color:#8a1f1f;padding:8px 12px;margin-bottom:12px;border-radius:6px;">
+    {{ error }}
+  </div>
+{% endif %}
+
+<form method="post" action="/autos-actualizar/{{ auto.id }}" style="max-width:560px;">
+  <div style="margin-bottom:10px;">
+    <label>Marca</label><br>
+    <input name="marca" required style="width:100%;padding:8px;" value="{{ form.marca if form else auto.marca }}">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label>Modelo</label><br>
+    <input name="modelo" required style="width:100%;padding:8px;" value="{{ form.modelo if form else auto.modelo }}">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label>VIN</label><br>
+    <input name="vin" required style="width:100%;padding:8px;" value="{{ form.vin if form else auto.vin }}">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label>Color</label><br>
+    <input name="color" required style="width:100%;padding:8px;" value="{{ form.color if form else auto.color }}">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label>Año</label><br>
+    <input name="anio" type="number" min="1900" max="2100" required style="width:100%;padding:8px;" value="{{ form.anio if form else auto.anio }}">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label>Precio</label><br>
+    <input name="precio" type="number" step="0.01" min="0" required style="width:100%;padding:8px;" value="{{ form.precio if form else auto.precio }}">
+  </div>
+
+  <button type="submit" style="padding:10px 14px;">Actualizar</button>
+  <a href="/autos-ui" style="margin-left:10px;">Cancelar</a>
+</form>
+{% endblock %}
+

@@ -1,0 +1,86 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from datetime import date
+from autogo_erp.models import SessionLocal, Car
+
+app = FastAPI()
+
+# Endpoint raíz
+@app.get("/")
+def read_root():
+    return {"message": "Bienvenido a AutoGo ERP Demo"}
+
+# Endpoint para listar autos
+@app.get("/autos")
+def listar_autos():
+    session = SessionLocal()
+    autos = session.query(Car).all()
+    session.close()
+    return [
+        {
+            "id": auto.id,
+            "brand": auto.brand,
+            "model": auto.model,
+            "year": auto.year,
+            "vin": auto.vin,
+            "color": auto.color,
+            "price": auto.price,
+            "status": auto.status,
+            "entry_date": str(auto.entry_date),
+        }
+        for auto in autos
+    ]
+
+# Endpoint para obtener un auto por ID
+@app.get("/autos/{auto_id}")
+def obtener_auto(auto_id: int):
+    session = SessionLocal()
+    auto = session.query(Car).filter(Car.id == auto_id).first()
+    session.close()
+    if auto is None:
+        return {"error": "Auto no encontrado"}
+    return {
+        "id": auto.id,
+        "brand": auto.brand,
+        "model": auto.model,
+        "year": auto.year,
+        "vin": auto.vin,
+        "color": auto.color,
+        "price": auto.price,
+        "status": auto.status,
+        "entry_date": str(auto.entry_date),
+    }
+
+# Modelo de datos para agregar autos
+class CarCreate(BaseModel):
+from fastapi import HTTPException
+
+class CarCreate(BaseModel):
+    brand: str
+    model: str
+    year: int
+    vin: str
+    color: str
+    price: float
+    status: str
+    entry_date: date
+
+@app.post("/autos")
+def agregar_auto(car: CarCreate):
+    session = SessionLocal()
+    nuevo_auto = Car(
+        brand=car.brand,
+        model=car.model,
+        year=car.year,
+        vin=car.vin,
+        color=car.color,
+        price=car.price,
+        status=car.status,
+        entry_date=car.entry_date,
+    )
+    session.add(nuevo_auto)
+    session.commit()
+    session.refresh(nuevo_auto)
+    session.close()
+    return {"message": "Auto agregado exitosamente", "auto_id": nuevo_auto.id}
+
