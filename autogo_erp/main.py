@@ -61,4 +61,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def root(request: Request):
     return HTMLResponse("<h1>AutoGo ERP</h1><p>Visita <a href='/docs'>/docs</a></p>")
 
+# Healthcheck simple
+@app.get("/health", tags=["Health"])
+def health():
+    return {"status": "ok"}
 
