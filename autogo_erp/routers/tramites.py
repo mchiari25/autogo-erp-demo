@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from autogo_erp.database import SessionLocal
-from autogo_erp.models_costos import Costo   # usamos el modelo en español
+from ..models_costos import Costo
 
 router = APIRouter(prefix="/tramites", tags=["Trámites"])
 
