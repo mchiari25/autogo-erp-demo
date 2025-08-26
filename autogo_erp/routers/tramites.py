@@ -4,11 +4,11 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from autogo_erp.database import SessionLocal
-from ..models_costos import Costo
+from ..models_costos import Costo  # import relativo (funciona en Linux/Production)
 
 router = APIRouter(prefix="/tramites", tags=["Trámites"])
 
-# Dependencia DB
+# --- Dependencia DB ---
 def get_db():
     db = SessionLocal()
     try:
@@ -16,13 +16,13 @@ def get_db():
     finally:
         db.close()
 
-# --- Schemas ---
+# --- Schemas (Pydantic) ---
 class TramiteItemIn(BaseModel):
     descripcion: str = Field(..., max_length=150)
     monto: float
 
 class TramiteIn(BaseModel):
-    referencia: Optional[str] = Field(None, max_length=50)  # opcional: vincular con vehículo
+    referencia: Optional[str] = Field(None, max_length=50)  # opcional: vincular con vehículo, nro, etc.
     items: List[TramiteItemIn]
 
 class TramiteOut(BaseModel):
@@ -36,11 +36,12 @@ class TramiteOut(BaseModel):
         from_attributes = True
 
 # --- Endpoints ---
-@router.get("/", response_model=List[TramiteOut], summary="Listar trámites")
+
+@router.get("/", response_model=List[TramiteOut], summary="Listar trámites (costos tipo=tramite)")
 def listar_tramites(db: Session = Depends(get_db)):
     return db.query(Costo).filter(Costo.tipo == "tramite").all()
 
-@router.post("/", summary="Crear trámite")
+@router.post("/", summary="Crear trámite con items (tipo=tramite)")
 def crear_tramite(payload: TramiteIn, db: Session = Depends(get_db)):
     total = 0.0
     creados = []
@@ -64,8 +65,8 @@ def crear_tramite(payload: TramiteIn, db: Session = Depends(get_db)):
         "items_creados": [c.id for c in creados]
     }
 
-@router.get("/{id}", response_model=TramiteOut, summary="Obtener trámite por id")
-def obtener_tramite(id: int, db: Session = Depends(get_db)):
+@router.get("/{id}", response_model=TramiteOut, summary="Obtener un ítem de trámite por id")
+def obtener_tramite_item(id: int, db: Session = Depends(get_db)):
     c = db.query(Costo).filter(Costo.id == id, Costo.tipo == "tramite").first()
     if not c:
         raise HTTPException(status_code=404, detail="Trámite no encontrado")
