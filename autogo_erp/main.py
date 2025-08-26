@@ -1,4 +1,6 @@
 # Forzar redeploy limpio
+from sqlalchemy import inspect, text
+from autogo_erp.database import SessionLocal, Base, engine
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -21,8 +23,14 @@ templates = Jinja2Templates(directory="templates")
 def include_all_routers(app: FastAPI):
     routers_path = pathlib.Path(__file__).parent / "routers"
     package_name = "autogo_erp.routers"
+
+    # Ignorar routers legados que dependían del viejo schemas.py
+    skip = {"imports", "gallery", "photos", "sales", "autos"}
+
     if routers_path.exists():
         for _, module_name, _ in pkgutil.iter_modules([str(routers_path)]):
+            if module_name in skip:
+                continue
             module = importlib.import_module(f"{package_name}.{module_name}")
             if hasattr(module, "router"):
                 app.include_router(module.router)
@@ -32,21 +40,23 @@ include_all_routers(app)
 # Crear tablas y cargar demo si está vacío
 @app.on_event("startup")
 def startup():
-    # Crear tablas (si no existen)
+    # 1) Crear tablas base
     Base.metadata.create_all(bind=engine)
 
-    # Asegurar que exista la columna plate en vehicles
+    # 2) Mini-migración: agregar columnas que falten en 'vehicles'
     insp = inspect(engine)
-    try:
-        cols = [c["name"] for c in insp.get_columns("vehicles")]
+    cols = [c["name"] for c in insp.get_columns("vehicles")]
+    with engine.begin() as conn:
         if "plate" not in cols:
-            with engine.begin() as conn:
-                conn.execute(text("ALTER TABLE vehicles ADD COLUMN plate VARCHAR"))
-                conn.execute(text("CREATE INDEX IF NOT EXISTS ix_vehicles_plate ON vehicles(plate)"))
-    except Exception as e:
-        print("⚠️ Error verificando o modificando tabla vehicles:", e)
+            conn.execute(text("ALTER TABLE vehicles ADD COLUMN plate VARCHAR"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS ix_vehicles_plate ON vehicles(plate)"))
+        if "seller_document" not in cols:
+            conn.execute(text("ALTER TABLE vehicles ADD COLUMN seller_document VARCHAR(64)"))
+        if "received_date" not in cols:
+            conn.execute(text("ALTER TABLE vehicles ADD COLUMN received_date DATE"))
 
-    # Cargar datos demo
+    # 3) Cargar demo (import diferido para evitar ciclos)
+    from autogo_erp.seed import cargar_demo_si_vacio
     db = SessionLocal()
     try:
         cargar_demo_si_vacio(db)
