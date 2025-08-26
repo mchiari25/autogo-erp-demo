@@ -66,6 +66,11 @@ class Vehicle(Base):
         back_populates="vehicle",
         cascade="all, delete-orphan",
     )
+    costos = relationship(
+        "Costo",
+        back_populates="vehiculo",
+        cascade="all, delete-orphan",
+    )
 
 # =========================
 # Photo
