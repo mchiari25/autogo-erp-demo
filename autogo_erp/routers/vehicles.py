@@ -3,10 +3,18 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from autogo_erp import models
-from autogo_erp.database import get_db
+from autogo_erp.database import SessionLocal  # ← usamos SessionLocal, no get_db
 from autogo_erp.schemas import VehicleRead, VehicleCreate, VehicleUpdate
 
 router = APIRouter(prefix="/vehicles", tags=["Vehicles"])
+
+# ===== Dependencia DB (local a este router) =====
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def _norm_plate(p: Optional[str]) -> Optional[str]:
     if p is None:
@@ -52,9 +60,8 @@ def create_vehicle(payload: VehicleCreate, db: Session = Depends(get_db)):
         acquisition_type=payload.acquisition_type,
         seller_name=payload.seller_name,
         seller_contact=payload.seller_contact,
-        # 👇 NUEVOS CAMPOS
-        seller_document=payload.seller_document,
-        received_date=payload.received_date,
+        seller_document=payload.seller_document,   # nuevos campos
+        received_date=payload.received_date,       # nuevos campos
     )
     db.add(v)
     db.commit()
