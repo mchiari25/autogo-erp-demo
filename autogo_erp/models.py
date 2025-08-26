@@ -51,6 +51,11 @@ class Vehicle(Base):
     # Datos del vendedor
     seller_name = Column(String(128), nullable=False)
     seller_contact = Column(String(128), nullable=True)
+    seller_document = Column(String(64), nullable=True)  # <-- NUEVO
+    received_date = Column(Date, nullable=True)          # <-- NUEVO
+
+    # Estado del vehículo
+    status = Column(SAEnum(VehicleStatus), nullable=False, default=VehicleStatus.AVAILABLE)
 
     # Estado del vehículo
     status = Column(SAEnum(VehicleStatus), nullable=False, default=VehicleStatus.AVAILABLE)
